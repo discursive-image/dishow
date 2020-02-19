@@ -3,11 +3,11 @@ import './App.css';
 import { Image } from './Image';
 
 
-//const URL = 'ws://192.168.1.68:7745/di/stream'; //daniel
-const URL = 'ws://localhost:7745/di/stream';
+const URL = 'ws://192.168.1.68:7745/di/stream'; //daniel
+//const URL = 'ws://localhost:7745/di/stream';
 const delay = 2000; //in ms
 var images = [];
-
+var nextImg = new Image("","");
 
 class App extends React.Component {
   constructor(props) {
@@ -64,9 +64,18 @@ class App extends React.Component {
     //update the state with a new image
     this.myInterval = setInterval(() => {
       if (this.state.play && images.length > 0) {
-        this.updateImg(images.pop())
+        this.updateImg(images[0])
+        images = images.slice(1,images.length)
+        if(images.length > 1){
+          nextImg = images[1];
+          console.log(nextImg.link)
+        }
+       
       }
     }, delay)
+  }
+  imageLoaded(){
+    console.log("loaded")
   }
 
 
@@ -80,6 +89,9 @@ class App extends React.Component {
               <button className="Play-Button" onClick={this.handleClick}>
                 <img src={this.state.ico} className="Play-img" alt="new"></img>
               </button>
+            </div>
+            <div id="preload">
+              <img onLoad={this.imageLoaded} src={nextImg.link} className="nextImg" alt="new"></img>
             </div>
             <div className="section">
               <div className="imgCaption">
