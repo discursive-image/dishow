@@ -1,0 +1,45 @@
+.Image {
+  min-height: 90vh;
+  max-height: 90vh;
+}
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+
+.Play-Button{
+  width: 0vw;
+  height: 0vh;
+  border: 0px;
+  
+}
+.Play-img{
+  width: 3vw;
+  height: 5vh;
+}
+
+#wrapper{
+  width: 100vw;
+  display:flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.section{
+  margin-inline: 5vh;
+}
+
+.imgCaption{
+  margin-left: 35vw;
+}
