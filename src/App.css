@@ -35,6 +35,9 @@
   flex-direction: row;
   align-items: center;
 }
+#preload{
+  display: none;
+}
 
 .section{
   margin-inline: 5vh;
