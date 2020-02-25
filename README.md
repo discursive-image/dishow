@@ -4,6 +4,8 @@ In the project directory, install all the required packages/dependencies using:
 
 ### `yarn`
 
+In dishow/src/App.js set "const URL = 'ws://localhost:7745/di/stream';" to run locally with https://github.com/jecoz/dis 
+
 In the project directory, you can run:
 
 ### `yarn start`
