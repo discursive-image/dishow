@@ -1,18 +1,18 @@
 import React from 'react';
 import './App.css';
-import { Image } from './Image';
+import { ImageC } from './Image';
 
 
 const URL = 'ws://192.168.1.68:7745/di/stream'; //daniel
 //const URL = 'ws://localhost:7745/di/stream';
 const delay = 2000; //in ms
 var images = [];
-var nextImg = new Image("","");
+var nextImg = new ImageC("","");
 
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { image: new Image("", ""), play: true, ico: "./pause.ico" };
+    this.state = { image: new ImageC("", ""), play: true, ico: "./pause.ico" };
     this.handleClick = this.handleClick.bind(this);
   }
   //websocket
