@@ -124,13 +124,17 @@ class App extends React.Component {
     // update the state with a new image
     this.myInterval = setInterval(() => {
       if (this.state.play && images.length > 0) {
-        this.updateImg(images[0])
+        if(this.state.hideCaption){
+          images[0].word = "";
+          this.updateImg(images[0])
+        }else{
+          this.updateImg(images[0])
+        }   
         images = images.slice(1, images.length)
         if (images.length > 1) {
           nextImg = images[1];
           console.log(imagesURL + "/" + nextImg.file_name)
         }
-
       }
     }, delay)
   }
@@ -139,7 +143,7 @@ class App extends React.Component {
     return (
       <div className="App" >
         <header className="App-header" style={{ backgroundColor: backgroundColor, color: fontColor }} >
-          <img src={imagesURL + "/" + this.state.image.file_name} className="Image" alt="new" />
+          <img src={imagesURL + "/" + this.state.image.file_name} className="Image" alt="" />
           <div id="wrapper" style={{ backgroundColor: backgroundColor }}>
             <div className="section">
               <div className="dropdown">
