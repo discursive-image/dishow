@@ -1,7 +1,7 @@
 export class Image {
-    constructor(link, caption, word, file_name) {
-      this.link = link;
-      this.caption = caption;
+    constructor(start_at, end_at, word, file_name) {
+      this.start_at = start_at;
+      this.end_at = end_at;
       this.file_name = file_name;
       this.word = word;
     }

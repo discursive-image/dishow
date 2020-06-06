@@ -19,27 +19,19 @@ const port = "7745";
 const streamURL = "/di/stream";
 // const imagesURL = "http://192.168.1.68:"+port+"/di/images";
 const imagesURL = "http://localhost:" + port + "/di/images";
-
 // const URL = 'ws://localhost:7745/di/stream';
-
-
-
-var delay = 2000; //in ms
 var images = [];
-var nextImg = new Image("", "");
 
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { image: new Image("", ""), play: true, darkMode: false, hideCaption: false, hideBar: false };
+    this.state = { image: new Image(), play: true, darkMode: false, hideCaption: false, hideBar: false, delay: 0 };
     this.handleClickBin = this.handleClickBin.bind(this);
     this.handleClickDarkMode = this.handleClickDarkMode.bind(this);
     this.handleClickHideCaption = this.handleClickHideCaption.bind(this);
     this.handleClickHideBar = this.handleClickHideBar.bind(this);
+    this.ws = new WebSocket(host + ":" + port + streamURL);
   }
-  // websocket
-  ws = new WebSocket(host + ":" + port + streamURL);
-
   // play pause button handler
   handleClickPlay() {
     this.setState(state => ({
@@ -70,8 +62,6 @@ class App extends React.Component {
     images = [];
   }
 
-  handleClickLogo() {
-  }
   handleClickHideCaption() {
     console.log("hide")
     if (this.state.hideCaption) {
@@ -83,6 +73,7 @@ class App extends React.Component {
       hideCaption: !state.hideCaption
     }));
   }
+
   handleClickHideBar() {
     console.log("bar")
     if (this.state.hideBar) {
@@ -109,41 +100,78 @@ class App extends React.Component {
     // on receiving a message
     this.ws.onmessage = evt => {
       const message = JSON.parse(evt.data)
-      console.log(message)
-      console.log("queue length: " + images.push(message))
-
+      if (message === 'ping') {
+        this.ws.send('pong');
+      } else {
+        console.log("queue length: " + images.push(message))
+      }
     }
     // automatically try to reconnect on connection loss
     this.ws.onclose = ev => {
-      console.log('disconnected')
+      console.log('disconnected ' + ev)
       this.setState({
         ws: new WebSocket(host + ":" + port + streamURL),
       })
     }
-
     // update the state with a new image
-    this.myInterval = setInterval(() => {
-      if (this.state.play && images.length > 0) {
-        if(this.state.hideCaption){
-          images[0].word = "";
-          this.updateImg(images[0])
-        }else{
-          this.updateImg(images[0])
-        }   
-        images = images.slice(1, images.length)
-        if (images.length > 1) {
-          nextImg = images[1];
-          console.log(imagesURL + "/" + nextImg.file_name)
-        }
+    this.myInterval = setTimeout(
+      () => this.timerHandler(), this.state.delay)
+  }
+
+  timerHandler() {
+    //da inserire il blocco 
+    this.offScreenMsg(this.state.image.file_name)
+    if (this.state.play && images.length > 0) {
+      if (this.state.hideCaption) {
+        images[0].word = "";
+        this.updateImg(images[0])
+      } else {
+        this.updateImg(images[0])
       }
-    }, delay)
+      images = images.slice(1, images.length)
+    } else {
+      this.updateImg(new Image("", "", "", ""));
+    }
+    var t;
+    if (((this.state.image.end_at - this.state.image.start_at) / 1000000) < 2000) {
+      t = (this.state.image.end_at - this.state.image.start_at) / 1000000
+    } else {
+      t = 2000
+    }
+    this.setState(state => ({
+      delay: t
+    }));
+    console.log("delay: " + this.state.delay)
+    this.myInterval = setTimeout(
+      () => this.timerHandler(), this.state.delay)
+  }
+
+  onScreenMsg(imgName) {
+    if (imgName !== "") {
+      var message = JSON.stringify({ "Type": "on-screen", "ImageLink": imgName });
+      try {
+        this.ws.send(message);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }
+  offScreenMsg(imgName) {
+    if (imgName !== "") {
+      var message = JSON.stringify({ "Type": "off-screen", "ImageLink": imgName });
+      try {
+        this.ws.send(message);
+      } catch (error) {
+        console.log(error);
+      }
+    }
   }
 
   render() {
     return (
       <div className="App" >
         <header className="App-header" style={{ backgroundColor: backgroundColor, color: fontColor }} >
-          <img src={imagesURL + "/" + this.state.image.file_name} className="Image" alt="" />
+          <img src={imagesURL + "/" + this.state.image.file_name} className="Image" alt="" onLoad={this.onScreenMsg(this.state.image.file_name)} />
           <div id="wrapper" style={{ backgroundColor: backgroundColor }}>
             <div className="section">
               <div className="dropdown">
@@ -188,5 +216,6 @@ class App extends React.Component {
     );
   }
 }
+
 
 export default App;
