@@ -146,9 +146,9 @@ class App extends React.Component {
       () => this.timerHandler(), this.state.delay)
   }
 
-  onScreenMsg(imgName) {
-    if (imgName !== "") {
-      var message = JSON.stringify({ "Type": "on-screen", "ImageLink": imgName });
+  onScreenMsg() {
+    if (this.state.image.file_name !== "") {
+      var message = JSON.stringify({ "type": "on-screen", "image_Link": this.state.image.file_name});
       try {
         this.ws.send(message);
       } catch (error) {
@@ -158,7 +158,7 @@ class App extends React.Component {
   }
   offScreenMsg(imgName) {
     if (imgName !== "") {
-      var message = JSON.stringify({ "Type": "off-screen", "ImageLink": imgName });
+      var message = JSON.stringify({ "type": "off-screen", "image_Link": imgName });
       try {
         this.ws.send(message);
       } catch (error) {
@@ -166,12 +166,12 @@ class App extends React.Component {
       }
     }
   }
-
+//onLoad={this.onScreenMsg(this.state.image.file_name)}
   render() {
     return (
       <div className="App" >
         <header className="App-header" style={{ backgroundColor: backgroundColor, color: fontColor }} >
-          <img src={imagesURL + "/" + this.state.image.file_name} className="Image" alt="" onLoad={this.onScreenMsg(this.state.image.file_name)} />
+          <img src={imagesURL + "/" + this.state.image.file_name} className="Image" alt="" onLoad={this.onScreenMsg.bind(this)} />
           <div id="wrapper" style={{ backgroundColor: backgroundColor }}>
             <div className="section">
               <div className="dropdown">
