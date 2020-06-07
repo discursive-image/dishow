@@ -148,7 +148,7 @@ class App extends React.Component {
 
   onScreenMsg() {
     if (this.state.image.file_name !== "") {
-      var message = JSON.stringify({ "type": "on-screen", "image_Link": this.state.image.file_name});
+      var message = JSON.stringify({ "type": "on-screen", "file_name": this.state.image.file_name});
       try {
         this.ws.send(message);
       } catch (error) {
@@ -158,7 +158,7 @@ class App extends React.Component {
   }
   offScreenMsg(imgName) {
     if (imgName !== "") {
-      var message = JSON.stringify({ "type": "off-screen", "image_Link": imgName });
+      var message = JSON.stringify({ "type": "off-screen", "file_name": imgName });
       try {
         this.ws.send(message);
       } catch (error) {
