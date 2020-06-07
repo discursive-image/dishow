@@ -2,6 +2,7 @@
   margin-top: 1vh;
   min-height: 90vh;
   max-height: 90vh;
+  border:none;
 }
   
 .App-header {

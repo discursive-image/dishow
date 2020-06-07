@@ -171,7 +171,8 @@ class App extends React.Component {
     return (
       <div className="App" >
         <header className="App-header" style={{ backgroundColor: backgroundColor, color: fontColor }} >
-          <img src={imagesURL + "/" + this.state.image.file_name} className="Image" alt="" onLoad={this.onScreenMsg.bind(this)} />
+          <img src={imagesURL + "/" + this.state.image.file_name} className="Image" alt={this.state.image.word} onLoad={this.onScreenMsg.bind(this)} />
+          <img src={imagesURL + "/" + images[1]} className="Image" alt={this.state.image.word} style={{display: "none"}}/>
           <div id="wrapper" style={{ backgroundColor: backgroundColor }}>
             <div className="section">
               <div className="dropdown">
