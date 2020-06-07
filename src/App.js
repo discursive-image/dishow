@@ -21,7 +21,7 @@ const streamURL = "/di/stream";
 const imagesURL = "http://localhost:" + port + "/di/images";
 // const URL = 'ws://localhost:7745/di/stream';
 var images = [];
-
+var preload;
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -129,6 +129,12 @@ class App extends React.Component {
         this.updateImg(images[0])
       }
       images = images.slice(1, images.length)
+      if(images.length > 0){
+        preload = imagesURL + "/" + images[0].file_name;
+      }else{
+        preload = "";
+      }
+
     } else {
       this.updateImg(new Image("", "", "", ""));
     }
@@ -148,6 +154,7 @@ class App extends React.Component {
 
   onScreenMsg() {
     if (this.state.image.file_name !== "") {
+      console.log("loaded: " + this.state.image.file_name)
       var message = JSON.stringify({ "type": "on-screen", "file_name": this.state.image.file_name});
       try {
         this.ws.send(message);
@@ -172,7 +179,7 @@ class App extends React.Component {
       <div className="App" >
         <header className="App-header" style={{ backgroundColor: backgroundColor, color: fontColor }} >
           <img src={imagesURL + "/" + this.state.image.file_name} className="Image" alt={this.state.image.word} onLoad={this.onScreenMsg.bind(this)} />
-          <img src={imagesURL + "/" + images[1]} className="Image" alt={this.state.image.word} style={{display: "none"}}/>
+          <img src={preload} className="Image" style={{display: "none"}} alt="preload" onLoad={console.log("preloaded: " + preload)}/>
           <div id="wrapper" style={{ backgroundColor: backgroundColor }}>
             <div className="section">
               <div className="dropdown">
