@@ -22,15 +22,19 @@ const imagesURL = "http://localhost:" + port + "/di/images";
 // const URL = 'ws://localhost:7745/di/stream';
 var images = [];
 var preload;
+var imagePath;
+var running = false;
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { image: new Image(), play: true, darkMode: false, hideCaption: false, hideBar: false, delay: 500 };
+    this.state = { image: new Image("","","",""), play: true, darkMode: false, hideCaption: false, hideBar: false};
     this.handleClickBin = this.handleClickBin.bind(this);
     this.handleClickDarkMode = this.handleClickDarkMode.bind(this);
     this.handleClickHideCaption = this.handleClickHideCaption.bind(this);
     this.handleClickHideBar = this.handleClickHideBar.bind(this);
     this.ws = new WebSocket(host + ":" + port + streamURL);
+    this.timerHandler = this.timerHandler.bind(this);
+    this.imageSetter = this.imageSetter.bind(this);
   }
   // play pause button handler
   handleClickPlay() {
@@ -89,6 +93,12 @@ class App extends React.Component {
   // set a new image as state
   updateImg(newImg) {
     this.setState({ image: newImg })
+    if(newImg.file_name !== ""){ // avoid sending request for empty images
+      imagePath = imagesURL + "/"
+    }else{
+      imagePath = "";
+    }
+
   }
 
   componentDidMount() {
@@ -100,63 +110,65 @@ class App extends React.Component {
     // on receiving a message
     this.ws.onmessage = evt => {
       const message = JSON.parse(evt.data)
-      if (message === 'ping') {
-        this.ws.send('pong');
-      } else {
-        console.log("queue length: " + images.push(message))
+      images.push(message)
+      if(!running){ // check if image setter is runnung already otherwise calls it
+        this.imageSetter()
+        running = true;
       }
     }
     // automatically try to reconnect on connection loss
     this.ws.onclose = ev => {
-      console.log('disconnected ' + ev)
+      console.log('disconnected ')
       this.setState({
         ws: new WebSocket(host + ":" + port + streamURL),
       })
     }
     this.myInterval = setTimeout(
-      () => this.timerHandler(), this.state.delay)
+      () => this.timerHandler(), this.state.delay);
     
   }
-
-  timerHandler() {
-    //da inserire il blocco 
-    this.offScreenMsg(this.state.image.file_name)
+  // set the image to be displayed and then set a new one if there is otherwise clear the old one
+  imageSetter(){
+    this.offScreenMsg(this.state.image.word)
     if (this.state.play && images.length > 0) {
-      if (this.state.hideCaption) {
+      if (this.state.hideCaption) {// remove caption from image
         images[0].word = "";
-        this.updateImg(images[0])
-      } else {
-        this.updateImg(images[0])
       }
-      images = images.slice(1, images.length)
+      this.updateImg(images[0])
+      images = images.slice(1, images.length)// resize queque
       if (images.length > 0) {
         preload = imagesURL + "/" + images[0].file_name;
       }
     } else {
       this.updateImg(new Image("", "", "", ""));
     }
-    
-    var t;
-    if(this.state.image.file_name !== ""){
-      if (((this.state.image.end_at - this.state.image.start_at) / 1000000) < 2000) {
-        t = (this.state.image.end_at - this.state.image.start_at) / 1000000
-      } else {
-        t = 2000
-      }
-      this.setState(state => ({
-        delay: t
-      }));
+    var runAgain;
+    if(this.state.image.file_name === ""){
+      runAgain = false;
     }else{
-      clearTimeout(this.myInterval)
+      runAgain = true;
     }
-    this.myInterval = setTimeout(
-      () => this.timerHandler(), this.state.delay)
+    this.timerHandler(runAgain);
+  }
+
+  // if there is an image on screen it run again to clear it then stop
+  timerHandler(runAgain) {
+    var delay;
+    if (((this.state.image.end_at - this.state.image.start_at) / 1000000) < 2000) {
+      delay = (this.state.image.end_at - this.state.image.start_at) / 1000000
+    } else {
+      delay = 2000
+    }
+    if(runAgain){
+      setTimeout(this.imageSetter,delay)
+    }else{
+      running = false;
+    }
   }
 
   onScreenMsg() {
     if (this.state.image.file_name !== "") {
-      //console.log("loaded: " + this.state.image.file_name)
-      var message = JSON.stringify({ "type": "on-screen", "file_name": this.state.image.file_name });
+      var message = JSON.stringify({ "type": "on-screen", "file_name": this.state.image.word });
       try {
         this.ws.send(message);
       } catch (error) {
@@ -179,8 +191,8 @@ class App extends React.Component {
     return (
       <div className="App" >
         <header className="App-header" style={{ backgroundColor: backgroundColor, color: fontColor }} >
-          <img src={imagesURL + "/" + this.state.image.file_name} className="Image" alt={this.state.image.word} onLoad={this.onScreenMsg.bind(this)} />
-          <img src={preload} className="Image" style={{ display: "none" }} alt="preload" onLoad={console.log("preloaded: " + preload)} />
+          <img src={imagePath + this.state.image.file_name} className="Image" alt={this.state.image.word} onLoad={this.onScreenMsg.bind(this)} />
+          <img src={preload} className="Image" style={{ display: "none" }} alt="preload"/>
           <div id="wrapper" style={{ backgroundColor: backgroundColor }}>
             <div className="section">
               <div className="dropdown">
