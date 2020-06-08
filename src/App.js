@@ -13,7 +13,7 @@ var hideBarsrc = unchecked;
 var darkModesrc = unchecked;
 
 // URLS variables
-// const host = 'ws://192.168.1.68'; //daniel
+//const host = 'ws://4e0ea1a91ca2.eu.ngrok.io'; //daniel
 const host = 'ws://localhost';
 const port = "7745";
 const streamURL = "/di/stream";
@@ -25,7 +25,7 @@ var preload;
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { image: new Image(), play: true, darkMode: false, hideCaption: false, hideBar: false, delay: 0 };
+    this.state = { image: new Image(), play: true, darkMode: false, hideCaption: false, hideBar: false, delay: 500 };
     this.handleClickBin = this.handleClickBin.bind(this);
     this.handleClickDarkMode = this.handleClickDarkMode.bind(this);
     this.handleClickHideCaption = this.handleClickHideCaption.bind(this);
@@ -113,9 +113,9 @@ class App extends React.Component {
         ws: new WebSocket(host + ":" + port + streamURL),
       })
     }
-    // update the state with a new image
     this.myInterval = setTimeout(
       () => this.timerHandler(), this.state.delay)
+    
   }
 
   timerHandler() {
@@ -129,33 +129,34 @@ class App extends React.Component {
         this.updateImg(images[0])
       }
       images = images.slice(1, images.length)
-      if(images.length > 0){
+      if (images.length > 0) {
         preload = imagesURL + "/" + images[0].file_name;
-      }else{
-        preload = "";
       }
-
     } else {
       this.updateImg(new Image("", "", "", ""));
     }
+    
     var t;
-    if (((this.state.image.end_at - this.state.image.start_at) / 1000000) < 2000) {
-      t = (this.state.image.end_at - this.state.image.start_at) / 1000000
-    } else {
-      t = 2000
+    if(this.state.image.file_name !== ""){
+      if (((this.state.image.end_at - this.state.image.start_at) / 1000000) < 2000) {
+        t = (this.state.image.end_at - this.state.image.start_at) / 1000000
+      } else {
+        t = 2000
+      }
+      this.setState(state => ({
+        delay: t
+      }));
+    }else{
+      clearTimeout(this.myInterval)
     }
-    this.setState(state => ({
-      delay: t
-    }));
-    console.log("delay: " + this.state.delay)
     this.myInterval = setTimeout(
       () => this.timerHandler(), this.state.delay)
   }
 
   onScreenMsg() {
     if (this.state.image.file_name !== "") {
-      console.log("loaded: " + this.state.image.file_name)
-      var message = JSON.stringify({ "type": "on-screen", "file_name": this.state.image.file_name});
+      //console.log("loaded: " + this.state.image.file_name)
+      var message = JSON.stringify({ "type": "on-screen", "file_name": this.state.image.file_name });
       try {
         this.ws.send(message);
       } catch (error) {
@@ -173,13 +174,13 @@ class App extends React.Component {
       }
     }
   }
-//onLoad={this.onScreenMsg(this.state.image.file_name)}
+  //onLoad={this.onScreenMsg(this.state.image.file_name)}
   render() {
     return (
       <div className="App" >
         <header className="App-header" style={{ backgroundColor: backgroundColor, color: fontColor }} >
           <img src={imagesURL + "/" + this.state.image.file_name} className="Image" alt={this.state.image.word} onLoad={this.onScreenMsg.bind(this)} />
-          <img src={preload} className="Image" style={{display: "none"}} alt="preload" onLoad={console.log("preloaded: " + preload)}/>
+          <img src={preload} className="Image" style={{ display: "none" }} alt="preload" onLoad={console.log("preloaded: " + preload)} />
           <div id="wrapper" style={{ backgroundColor: backgroundColor }}>
             <div className="section">
               <div className="dropdown">
