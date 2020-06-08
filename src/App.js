@@ -129,7 +129,7 @@ class App extends React.Component {
   }
   // set the image to be displayed and then set a new one if there is otherwise clear the old one
   imageSetter(){
-    this.offScreenMsg(this.state.image.word)
+    this.offScreenMsg(this.state.image.file_name)
     if (this.state.play && images.length > 0) {
       if (this.state.hideCaption) {// remove caption from image
         images[0].word = "";
@@ -168,7 +168,7 @@ class App extends React.Component {
 
   onScreenMsg() {
     if (this.state.image.file_name !== "") {
-      var message = JSON.stringify({ "type": "on-screen", "file_name": this.state.image.word });
+      var message = JSON.stringify({ "type": "on-screen", "file_name": this.state.image.file_name});
       try {
         this.ws.send(message);
       } catch (error) {
