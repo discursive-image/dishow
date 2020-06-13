@@ -22,8 +22,12 @@ const imagesURL = "http://localhost:" + port + "/di/images";
 // const URL = 'ws://localhost:7745/di/stream';
 var images = [];
 var preload;
-var imagePath;
+var imagePath = imagesURL + "/"
 var running = false;
+// debug
+var currentOnScreen;
+var tot = 0;
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -93,12 +97,6 @@ class App extends React.Component {
   // set a new image as state
   updateImg(newImg) {
     this.setState({ image: newImg })
-    if(newImg.file_name !== ""){ // avoid sending request for empty images
-      imagePath = imagesURL + "/"
-    }else{
-      imagePath = "";
-    }
-
   }
 
   componentDidMount() {
@@ -123,8 +121,6 @@ class App extends React.Component {
         ws: new WebSocket(host + ":" + port + streamURL),
       })
     }
-    this.myInterval = setTimeout(
-      () => this.timerHandler(), this.state.delay);
     
   }
   // set the image to be displayed and then set a new one if there is otherwise clear the old one
@@ -154,10 +150,15 @@ class App extends React.Component {
   // if there is an image on screen it run again to clear it then stop
   timerHandler(runAgain) {
     var delay;
-    if (((this.state.image.end_at - this.state.image.start_at) / 1000000) < 2000) {
-      delay = (this.state.image.end_at - this.state.image.start_at) / 1000000
-    } else {
-      delay = 2000
+    var duration = (this.state.image.end_at - this.state.image.start_at) / 1000000;
+    if (duration < 2000) {
+      if(duration > 100){
+        delay = duration
+      }else{
+        delay = 100;
+      }
+    }else{
+      delay = 2000;
     }
     if(runAgain){
       setTimeout(this.imageSetter,delay)
@@ -174,6 +175,7 @@ class App extends React.Component {
       } catch (error) {
         console.log(error);
       }
+      currentOnScreen = this.state.image.file_name;
     }
   }
   offScreenMsg(imgName) {
@@ -183,6 +185,10 @@ class App extends React.Component {
         this.ws.send(message);
       } catch (error) {
         console.log(error);
+      }
+      if(imgName !== currentOnScreen){
+        tot++
+        console.log("img not loaded: " + imgName + " delay: " + (this.state.image.end_at - this.state.image.start_at)/1000000 + " tot: " + tot)
       }
     }
   }
